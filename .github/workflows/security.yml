@@ -1,4 +1,4 @@
-name: security-dotnet
+name: security
 
 on:
   workflow_call:
@@ -7,22 +7,21 @@ on:
         description: Image name for the Trivy scan
         type: string
         default: 'app'
-      has-dockerfile:
-        description: Run Trivy Docker image scan
+      has-nuget-audit:
+        description: Run NuGet vulnerability audit
         type: boolean
-        default: true
+        default: false
       solution-path:
-        description: Path to the solution directory
+        description: Path to the solution directory (for NuGet audit)
         type: string
         default: 'src'
       solution-file:
-        description: Solution file name for NuGet audit
+        description: Solution file name (for NuGet audit)
         type: string
-        required: true
+        default: ''
 
 jobs:
   trivy:
-    if: inputs.has-dockerfile
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -50,6 +49,7 @@ jobs:
           sarif_file: trivy.sarif
 
   nuget-audit:
+    if: inputs.has-nuget-audit
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
