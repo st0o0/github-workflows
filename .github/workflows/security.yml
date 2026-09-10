@@ -7,18 +7,6 @@ on:
         description: Image name for the Trivy scan
         type: string
         default: 'app'
-      has-nuget-audit:
-        description: Run NuGet vulnerability audit
-        type: boolean
-        default: false
-      solution-path:
-        description: Path to the solution directory (for NuGet audit)
-        type: string
-        default: 'src'
-      solution-file:
-        description: Solution file name (for NuGet audit)
-        type: string
-        default: ''
 
 jobs:
   trivy:
@@ -47,19 +35,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy.sarif
-
-  nuget-audit:
-    if: inputs.has-nuget-audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: ${{ inputs.solution-path }}/global.json
-      - working-directory: ${{ inputs.solution-path }}
-        run: dotnet restore ${{ inputs.solution-file }}
-      - working-directory: ${{ inputs.solution-path }}
-        run: dotnet list ${{ inputs.solution-file }} package --vulnerable --include-transitive
