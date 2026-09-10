@@ -15,8 +15,9 @@ on:
         description: NuGet package name (for release notes URL)
         type: string
         required: true
-    secrets:
-      NUGET_API_KEY:
+      nuget-user:
+        description: NuGet username for Trusted Publishing (OIDC)
+        type: string
         required: true
 
 jobs:
@@ -102,20 +103,24 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     environment:
       name: nuget
       url: https://www.nuget.org/packages/${{ inputs.package-name }}
     steps:
       - uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: ${{ inputs.solution-path }}/global.json
       - uses: actions/download-artifact@v8
         with:
           name: nuget-packages
           path: ./packages
+      - uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ inputs.nuget-user }}
       - name: Push to NuGet
         run: >-
-          dotnet nuget push --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate ./packages/*.nupkg
       - name: Attach .nupkg to GitHub Release
