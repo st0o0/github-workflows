@@ -1,0 +1,168 @@
+name: dotnet-nuget-release
+
+on:
+  workflow_call:
+    inputs:
+      solution-path:
+        description: Path to the solution directory
+        type: string
+        default: 'src'
+      solution-file:
+        description: Solution file name (sln/slnx)
+        type: string
+        required: true
+      package-name:
+        description: NuGet package name (for release notes URL)
+        type: string
+        required: true
+      check-licenses:
+        description: Run nuget-license check
+        type: boolean
+        default: false
+      license-project:
+        description: Project path for license check (relative to repo root)
+        type: string
+        default: ''
+      allowed-licenses:
+        description: Semicolon-separated allowed licenses
+        type: string
+        default: 'MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;MS-PL'
+    secrets:
+      NUGET_API_KEY:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    outputs:
+      releaseVersion: ${{ steps.gitversion.outputs.majorMinorPatch }}
+      semVer: ${{ steps.gitversion.outputs.fullSemVer }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ${{ inputs.solution-path }}/global.json
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - run: dotnet tool restore
+
+      - name: Slopwatch
+        run: dotnet tool run slopwatch analyze --fail-on warning
+
+      - uses: gittools/actions/gitversion/setup@v1.1.1
+        with:
+          versionSpec: '5.x'
+      - uses: gittools/actions/gitversion/execute@v1.1.1
+        id: gitversion
+
+      - name: Restore
+        run: dotnet restore --locked-mode ${{ inputs.solution-path }}/${{ inputs.solution-file }}
+
+      - if: inputs.check-licenses
+        name: License check
+        shell: pwsh
+        run: |
+          dotnet tool run nuget-license -err -t -o JsonPretty -a "${{ inputs.allowed-licenses }}" -i ${{ inputs.license-project }} -fo result.json
+          if ((Get-Content result.json | ConvertFrom-Json).Count -gt 0) { throw "License violations found!" }
+
+      - name: Build
+        run: >-
+          dotnet build --configuration Release --no-restore
+          ${{ inputs.solution-path }}/${{ inputs.solution-file }}
+          /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+          /p:ContinuousIntegrationBuild=true
+
+      - name: Test
+        working-directory: ${{ inputs.solution-path }}
+        run: >-
+          dotnet test --configuration Release --no-ansi --no-build
+          --coverage --coverage-output-format cobertura
+          --results-directory ${{ github.workspace }}/testresults
+          --solution *.*
+
+      - name: Pack
+        run: >-
+          dotnet pack --configuration Release --no-build
+          --output ./packages
+          ${{ inputs.solution-path }}/${{ inputs.solution-file }}
+          /p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}
+
+      - uses: danielpalme/ReportGenerator-GitHub-Action@5
+        with:
+          reports: '${{ github.workspace }}/testresults/**/coverage.cobertura.xml'
+          targetdir: ./coveragereport
+          reporttypes: MarkdownSummaryGithub
+          tag: ${{ steps.gitversion.outputs.fullSemVer }}
+      - if: always()
+        run: cat ./coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nuget-packages
+          path: ./packages/*.nupkg
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/${{ inputs.package-name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: ${{ inputs.solution-path }}/global.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: nuget-packages
+          path: ./packages
+
+      - name: Push to NuGet
+        run: >-
+          dotnet nuget push --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate ./packages/*.nupkg
+
+      - name: Generate release notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.releaseVersion }}
+          PKG: ${{ inputs.package-name }}
+        run: |
+          cat > notes.md << EOF
+          $PKG v$VERSION
+
+          [![NuGet](https://img.shields.io/nuget/v/${PKG}?logo=nuget)](https://nuget.org/packages/${PKG})
+
+          EOF
+          gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name="v${VERSION}" \
+            --jq .body >> notes.md || echo "No changelog available" >> notes.md
+          echo "release-notes<<EOF" >> $GITHUB_OUTPUT
+          cat notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.releaseVersion }}
+          target_commitish: ${{ github.sha }}
+          name: v${{ needs.build.outputs.releaseVersion }}
+          body: ${{ steps.notes.outputs.release-notes }}
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: ./packages/*.nupkg
