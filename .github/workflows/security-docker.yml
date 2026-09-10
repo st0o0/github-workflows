@@ -1,0 +1,37 @@
+name: security-docker
+
+on:
+  workflow_call:
+    inputs:
+      docker-image-name:
+        description: Image name for the Trivy scan
+        type: string
+        default: 'app'
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ inputs.docker-image-name }}:scan
+          cache-from: type=gha
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ inputs.docker-image-name }}:scan
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+      - if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy.sarif

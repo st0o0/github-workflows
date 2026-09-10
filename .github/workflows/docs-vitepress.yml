@@ -1,0 +1,55 @@
+name: docs-vitepress
+
+on:
+  workflow_call:
+    inputs:
+      docs-path:
+        description: Path to the VitePress docs directory
+        type: string
+        default: 'docs'
+      node-version:
+        description: Node.js version
+        type: string
+        default: '22'
+      needs-dotnet-build:
+        description: Run dotnet build before VitePress (for XML doc generation)
+        type: boolean
+        default: false
+      dotnet-project-path:
+        description: Path to the .NET solution/project (when needs-dotnet-build is true)
+        type: string
+        default: 'src'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - if: inputs.needs-dotnet-build
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ${{ inputs.dotnet-project-path }}/global.json
+      - if: inputs.needs-dotnet-build
+        run: dotnet build ${{ inputs.dotnet-project-path }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.docs-path }}/package-lock.json
+      - run: npm ci
+        working-directory: ${{ inputs.docs-path }}
+      - run: npm run build
+        working-directory: ${{ inputs.docs-path }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ inputs.docs-path }}/.vitepress/dist
+      - uses: actions/deploy-pages@v4
+        id: deployment
