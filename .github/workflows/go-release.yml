@@ -1,4 +1,4 @@
-name: go-docker-release
+name: Go Release
 
 on:
   workflow_call:

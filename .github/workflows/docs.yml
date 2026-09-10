@@ -1,4 +1,4 @@
-name: docs-vitepress
+name: Docs
 
 on:
   workflow_call:
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - if: inputs.needs-dotnet-build
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: ${{ inputs.dotnet-project-path }}/global.json
       - if: inputs.needs-dotnet-build

@@ -1,4 +1,4 @@
-name: dotnet-nuget-release
+name: .NET NuGet Release
 
 on:
   workflow_call:
@@ -84,6 +84,7 @@ jobs:
         run: >-
           dotnet test --configuration Release --no-ansi --no-build
           --coverage --coverage-output-format cobertura
+          --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
           --solution *.*
 
@@ -93,6 +94,7 @@ jobs:
           --output ./packages
           ${{ inputs.solution-path }}/${{ inputs.solution-file }}
           /p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}
+          /p:PackageReleaseNotes="https://github.com/${{ github.repository }}/releases/tag/v${{ steps.gitversion.outputs.majorMinorPatch }}"
 
       - uses: danielpalme/ReportGenerator-GitHub-Action@5
         with:

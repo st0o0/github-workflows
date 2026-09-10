@@ -1,4 +1,4 @@
-name: dotnet-dev-build
+name: .NET Dev Build
 
 on:
   workflow_call:
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles(format('{0}/**/*.csproj', inputs.solution-path), format('{0}/Directory.Packages.props', inputs.solution-path)) }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
       - id: vars
         run: echo "shortsha=$(cut -c1-7 <<< '${{ github.event.pull_request.head.sha }}')" >> "$GITHUB_OUTPUT"

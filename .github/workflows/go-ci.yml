@@ -1,4 +1,4 @@
-name: go-ci
+name: Go CI
 
 on:
   workflow_call:
@@ -15,8 +15,8 @@ on:
         description: Build and lint Dockerfile
         type: boolean
         default: true
-      smoke-test-command:
-        description: Command to run as smoke test after Docker build (empty to skip)
+      smoke-test-script:
+        description: Path to smoke test script (empty to skip)
         type: string
         default: ''
       docker-image-name:
@@ -73,9 +73,11 @@ jobs:
           tags: ${{ inputs.docker-image-name }}:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - if: inputs.smoke-test-command != ''
+      - if: inputs.smoke-test-script != ''
         name: Smoke test
-        run: ${{ inputs.smoke-test-command }}
+        run: |
+          chmod +x ${{ inputs.smoke-test-script }}
+          ${{ inputs.smoke-test-script }}
 
   e2e:
     if: inputs.has-e2e

@@ -1,4 +1,4 @@
-name: dotnet-ci
+name: .NET CI
 
 on:
   workflow_call:
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles(format('{0}/**/*.csproj', inputs.solution-path), format('{0}/Directory.Packages.props', inputs.solution-path)) }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
       - working-directory: ${{ inputs.solution-path }}
         run: dotnet test ${{ inputs.solution-file }}
@@ -52,7 +52,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles(format('{0}/**/*.csproj', inputs.solution-path), format('{0}/Directory.Packages.props', inputs.solution-path)) }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
       - if: inputs.has-dockerfile
         uses: hadolint/hadolint-action@v3.4.0
