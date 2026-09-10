@@ -4,37 +4,31 @@ Reusable GitHub Actions workflows for st0o0 repositories.
 
 ## Workflows
 
-### General
+### Shared
+
 | Workflow | Description |
 |---|---|
 | `commitlint.yml` | Commit message validation via wagoid/commitlint |
 | `codeql.yml` | GitHub CodeQL analysis (any language) |
+| `security.yml` | Trivy Docker image scan + SARIF upload to Security tab |
+| `docs.yml` | VitePress build + GitHub Pages deploy |
 
 ### Go
+
 | Workflow | Description |
 |---|---|
 | `go-ci.yml` | Lint (golangci-lint), test, Docker build, optional e2e |
-| `go-docker-release.yml` | Release-please + multi-arch Docker build + cosign signing |
+| `go-release.yml` | Release-please + multi-arch Docker build + cosign signing |
+| `go-dev-build.yml` | Label-gated PR dev image (single-stage Docker) |
 
 ### .NET
+
 | Workflow | Description |
 |---|---|
 | `dotnet-ci.yml` | Build, test, format check, hadolint |
-| `dotnet-nuget-release.yml` | GitVersion + test + pack + NuGet push + GitHub release |
-| `dotnet-docker-release.yml` | Release-please + per-RID publish + multi-arch Docker + cosign |
+| `dotnet-release-docker.yml` | Release-please + per-RID publish + multi-arch Docker + cosign |
+| `dotnet-release-nuget.yml` | GitVersion + test + pack + NuGet push + GitHub release |
 | `dotnet-dev-build.yml` | Label-gated PR dev image (per-RID, multi-arch manifest) |
-
-### Docker & Security
-| Workflow | Description |
-|---|---|
-| `dev-build.yml` | Label-gated PR dev image (single-stage Docker, e.g. Go) |
-| `security-docker.yml` | Trivy image scan + SARIF upload |
-| `security-dotnet.yml` | Trivy image scan + NuGet vulnerability audit |
-
-### Docs
-| Workflow | Description |
-|---|---|
-| `docs-vitepress.yml` | VitePress build + GitHub Pages deploy |
 
 ## Usage
 
@@ -67,7 +61,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    uses: st0o0/github-workflows/.github/workflows/go-docker-release.yml@main
+    uses: st0o0/github-workflows/.github/workflows/go-release.yml@main
     with:
       image-name: ghcr.io/st0o0/bifrost
       image-description: WireGuard client for DDNS endpoint changes
@@ -76,6 +70,28 @@ jobs:
       pull-requests: write
       packages: write
       id-token: write
+```
+
+```yaml
+# .github/workflows/security.yml
+name: Security
+on:
+  pull_request:
+    paths: ['Dockerfile', 'go.mod', 'go.sum']
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scan:
+    uses: st0o0/github-workflows/.github/workflows/security.yml@main
+    with:
+      docker-image-name: bifrost
+    permissions:
+      contents: read
+      security-events: write
 ```
 
 ### .NET Docker app (e.g. njord)
@@ -109,7 +125,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-docker-release.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-release-docker.yml@main
     with:
       image-name: ghcr.io/st0o0/njord
       image-description: Multi-model weather intelligence for Home Assistant
@@ -134,7 +150,7 @@ on:
     branches: [main]
 jobs:
   build:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-nuget-release.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-release-nuget.yml@main
     with:
       solution-file: Flickr.Net.sln
       package-name: Flickr.Net
