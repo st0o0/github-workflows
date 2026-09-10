@@ -144,12 +144,32 @@ jobs:
 # .github/workflows/ci.yml
 name: CI
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  build:
+  ci:
+    uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@main
+    with:
+      solution-file: Flickr.Net.sln
+      has-dockerfile: false
+  commitlint:
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@main
+```
+
+```yaml
+# .github/workflows/release.yml
+name: Release
+on:
+  push:
+    branches: [main]
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  release:
     uses: st0o0/github-workflows/.github/workflows/dotnet-release-nuget.yml@main
     with:
       solution-file: Flickr.Net.sln
@@ -158,7 +178,6 @@ jobs:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
     permissions:
       contents: write
-      deployments: write
-      checks: write
       pull-requests: write
+      checks: write
 ```
