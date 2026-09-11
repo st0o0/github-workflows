@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  commitlint:
+  check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
