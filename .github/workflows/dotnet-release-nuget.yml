@@ -69,11 +69,11 @@ jobs:
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test --configuration Release --no-ansi --no-build
+          dotnet test --solution ${{ inputs.solution-file }}
+          --configuration Release --no-ansi --no-build
           --coverage --coverage-output-format cobertura
           --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
-          --solution *.*
 
       - name: Pack
         run: >-

@@ -49,7 +49,7 @@ jobs:
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test ${{ inputs.solution-file }} --no-build
+          dotnet test --solution ${{ inputs.solution-file }} --no-build
           --coverage --coverage-output-format cobertura
           --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
