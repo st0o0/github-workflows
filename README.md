@@ -2,6 +2,17 @@
 
 Reusable GitHub Actions workflows for st0o0 repositories.
 
+## Versioning
+
+This repo uses [release-please](https://github.com/googleapis/release-please) with semantic versioning.
+Consumers should pin to a **major version tag**:
+
+```yaml
+uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1
+```
+
+The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to `@v2`.
+
 ## Workflows
 
 ### Shared
@@ -43,11 +54,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ci:
-    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@main
+    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@v1
     with:
       has-e2e: true
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@main
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
 ```
 
 ```yaml
@@ -61,7 +72,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    uses: st0o0/github-workflows/.github/workflows/go-release.yml@main
+    uses: st0o0/github-workflows/.github/workflows/go-release.yml@v1
     with:
       image-name: ghcr.io/st0o0/bifrost
       image-description: WireGuard client for DDNS endpoint changes
@@ -86,7 +97,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   scan:
-    uses: st0o0/github-workflows/.github/workflows/security.yml@main
+    uses: st0o0/github-workflows/.github/workflows/security.yml@v1
     with:
       docker-image-name: bifrost
     permissions:
@@ -107,11 +118,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ci:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1
     with:
       solution-file: Njord.slnx
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@main
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
 ```
 
 ```yaml
@@ -125,7 +136,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-release-docker.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-release-docker.yml@v1
     with:
       image-name: ghcr.io/st0o0/njord
       image-description: Multi-model weather intelligence for Home Assistant
@@ -151,12 +162,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ci:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1
     with:
       solution-file: Flickr.Net.sln
       has-dockerfile: false
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@main
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
 ```
 
 ```yaml
@@ -170,7 +181,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release:
-    uses: st0o0/github-workflows/.github/workflows/dotnet-release-nuget.yml@main
+    uses: st0o0/github-workflows/.github/workflows/dotnet-release-nuget.yml@v1
     with:
       solution-file: Flickr.Net.sln
       package-name: Flickr.Net
