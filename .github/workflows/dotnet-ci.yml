@@ -42,14 +42,14 @@ jobs:
           restore-keys: nuget-${{ runner.os }}-
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet restore --solution ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
+        run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build --solution ${{ inputs.solution-file }} --no-restore
+        run: dotnet build ${{ inputs.solution-file }} --no-restore
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test --solution ${{ inputs.solution-file }} --no-build
+          dotnet test ${{ inputs.solution-file }} --no-build
           --coverage --coverage-output-format cobertura
           --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
