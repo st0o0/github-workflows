@@ -63,7 +63,7 @@ jobs:
         working-directory: ${{ inputs.solution-path }}
         run: >-
           dotnet publish ${{ inputs.publish-project }}
-          -c Release -r ${{ matrix.rid }} --self-contained false
+          -c Release -r ${{ matrix.rid }} --self-contained false --no-restore
           -o ../publish/${{ matrix.rid }}
           -p:Version=0.0.0-pr.${{ github.event.pull_request.number }}.${{ steps.vars.outputs.shortsha }}
       - uses: actions/upload-artifact@v7

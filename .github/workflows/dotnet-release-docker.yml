@@ -71,17 +71,17 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
-      - name: Publish
-        working-directory: ${{ inputs.solution-path }}
-        run: >-
-          dotnet publish ${{ inputs.publish-project }}
-          -c Release -r ${{ matrix.rid }} --self-contained false
-          -o ../publish/${{ matrix.rid }}
-          -p:Version=${{ needs.release-please.outputs.version }}
       - if: matrix.test
         name: Test
         working-directory: ${{ inputs.solution-path }}
         run: dotnet test --solution ${{ inputs.solution-file }}
+      - name: Publish
+        working-directory: ${{ inputs.solution-path }}
+        run: >-
+          dotnet publish ${{ inputs.publish-project }}
+          -c Release -r ${{ matrix.rid }} --self-contained false --no-restore
+          -o ../publish/${{ matrix.rid }}
+          -p:Version=${{ needs.release-please.outputs.version }}
       - uses: actions/upload-artifact@v7
         with:
           name: publish-${{ matrix.rid }}
