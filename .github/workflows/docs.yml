@@ -38,7 +38,7 @@ jobs:
           global-json-file: ${{ inputs.dotnet-project-path }}/global.json
       - if: inputs.needs-dotnet-build
         run: dotnet build ${{ inputs.dotnet-project-path }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ inputs.node-version }}
           cache: npm
@@ -47,9 +47,9 @@ jobs:
         working-directory: ${{ inputs.docs-path }}
       - run: npm run build
         working-directory: ${{ inputs.docs-path }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ inputs.docs-path }}/.vitepress/dist
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
         id: deployment
