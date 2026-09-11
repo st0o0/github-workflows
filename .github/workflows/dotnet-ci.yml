@@ -37,7 +37,7 @@ jobs:
           key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
       - working-directory: ${{ inputs.solution-path }}
-        run: dotnet test ${{ inputs.solution-file }}
+        run: dotnet test --solution ${{ inputs.solution-file }}
 
   lint:
     runs-on: ubuntu-latest
@@ -61,4 +61,4 @@ jobs:
           config: .hadolint.yaml
       - if: inputs.check-format
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet format ${{ inputs.solution-file }} whitespace --verify-no-changes
+        run: dotnet format --solution ${{ inputs.solution-file }} whitespace --verify-no-changes
