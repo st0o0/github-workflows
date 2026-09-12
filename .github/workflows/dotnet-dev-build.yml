@@ -59,7 +59,7 @@ jobs:
           restore-keys: nuget-${{ runner.os }}-
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet restore
+        run: dotnet restore -r ${{ matrix.rid }}
       - id: vars
         run: echo "shortsha=$(cut -c1-7 <<< '${{ github.event.pull_request.head.sha }}')" >> "$GITHUB_OUTPUT"
       - name: Publish

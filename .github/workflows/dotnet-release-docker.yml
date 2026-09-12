@@ -58,7 +58,7 @@ jobs:
           restore-keys: nuget-${{ runner.os }}-
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet restore ${{ inputs.solution-file }}
+        run: dotnet restore ${{ inputs.solution-file }} -r ${{ matrix.rid }}
       - if: matrix.test
         name: Test
         working-directory: ${{ inputs.solution-path }}
