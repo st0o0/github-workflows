@@ -57,6 +57,9 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
+      - name: Restore
+        working-directory: ${{ inputs.solution-path }}
+        run: dotnet restore
       - id: vars
         run: echo "shortsha=$(cut -c1-7 <<< '${{ github.event.pull_request.head.sha }}')" >> "$GITHUB_OUTPUT"
       - name: Publish

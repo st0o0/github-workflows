@@ -56,6 +56,9 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
           restore-keys: nuget-${{ runner.os }}-
+      - name: Restore
+        working-directory: ${{ inputs.solution-path }}
+        run: dotnet restore ${{ inputs.solution-file }}
       - if: matrix.test
         name: Test
         working-directory: ${{ inputs.solution-path }}
