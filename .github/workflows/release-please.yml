@@ -1,0 +1,47 @@
+name: Release Please
+
+on:
+  workflow_call:
+    outputs:
+      release_created:
+        description: Whether a release was created (single-component repos)
+        value: ${{ jobs.release-please.outputs.release_created }}
+      version:
+        description: Semantic version without v-prefix (single-component repos)
+        value: ${{ jobs.release-please.outputs.version }}
+      tag_name:
+        description: Git tag name (single-component repos)
+        value: ${{ jobs.release-please.outputs.tag_name }}
+      releases_created:
+        description: Whether any release was created (multi-component repos)
+        value: ${{ jobs.release-please.outputs.releases_created }}
+      paths_released:
+        description: JSON array of released paths (multi-component repos)
+        value: ${{ jobs.release-please.outputs.paths_released }}
+      prs_created:
+        description: Whether any PR was created or updated
+        value: ${{ jobs.release-please.outputs.prs_created }}
+      json:
+        description: All release-please outputs as JSON for per-component access
+        value: ${{ jobs.release-please.outputs.json }}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      version: ${{ steps.release.outputs.version }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+      prs_created: ${{ steps.release.outputs.prs_created }}
+      json: ${{ toJSON(steps.release.outputs) }}
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

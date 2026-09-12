@@ -1,8 +1,12 @@
-name: Go Release
+name: Go Docker Release
 
 on:
   workflow_call:
     inputs:
+      version:
+        description: Semantic version to publish (e.g. 0.2.0)
+        type: string
+        required: true
       image-name:
         description: Full GHCR image name (e.g. ghcr.io/st0o0/bifrost)
         type: string
@@ -17,31 +21,14 @@ on:
         default: 'linux/amd64,linux/arm64'
 
 jobs:
-  release-please:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      version: ${{ steps.release.outputs.version }}
-      major: ${{ steps.release.outputs.major }}
-      minor: ${{ steps.release.outputs.minor }}
-    steps:
-      - uses: googleapis/release-please-action@v5
-        id: release
-        with:
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-
   docker:
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
       id-token: write
+    env:
+      VERSION: ${{ inputs.version }}
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-qemu-action@v4
@@ -51,13 +38,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Parse version components
+        id: semver
+        run: |
+          echo "major=$(echo "$VERSION" | cut -d. -f1)" >> "$GITHUB_OUTPUT"
+          echo "minor=$(echo "$VERSION" | cut -d. -f1-2)" >> "$GITHUB_OUTPUT"
       - uses: docker/metadata-action@v6
         id: meta
         with:
           images: ${{ inputs.image-name }}
           tags: |
-            type=raw,value=${{ needs.release-please.outputs.version }}
-            type=raw,value=${{ needs.release-please.outputs.major }}.${{ needs.release-please.outputs.minor }}
+            type=raw,value=${{ inputs.version }}
+            type=raw,value=${{ steps.semver.outputs.minor }}
             type=raw,value=latest
       - uses: docker/build-push-action@v7
         id: build
@@ -66,7 +58,7 @@ jobs:
           platforms: ${{ inputs.platforms }}
           push: true
           build-args: |
-            VERSION=${{ needs.release-please.outputs.version }}
+            VERSION=${{ inputs.version }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: |
