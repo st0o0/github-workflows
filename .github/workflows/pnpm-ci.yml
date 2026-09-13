@@ -1,0 +1,55 @@
+name: pnpm CI
+
+on:
+  workflow_call:
+    inputs:
+      project-path:
+        description: Path to the pnpm project directory
+        type: string
+        required: true
+      node-version:
+        description: Node.js version
+        type: string
+        default: '22'
+      lint:
+        description: Run pnpm lint
+        type: boolean
+        default: true
+      typecheck:
+        description: Run pnpm typecheck
+        type: boolean
+        default: true
+      test:
+        description: Run pnpm test
+        type: boolean
+        default: false
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+          cache-dependency-path: ${{ inputs.project-path }}/pnpm-lock.yaml
+      - name: Install
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm install --frozen-lockfile
+      - if: inputs.lint
+        name: Lint
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm lint
+      - if: inputs.typecheck
+        name: Typecheck
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm typecheck
+      - if: inputs.test
+        name: Test
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm test

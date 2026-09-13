@@ -1,0 +1,65 @@
+name: Go Build
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Semantic version (e.g. 0.2.0)
+        type: string
+        required: true
+      build-package:
+        description: Go package to build (e.g. ./cmd/app)
+        type: string
+        default: '.'
+      binary-name:
+        description: Output binary name
+        type: string
+        default: 'app'
+      ldflags:
+        description: Additional ldflags (version is always injected via -X main.version)
+        type: string
+        default: '-s -w'
+      extra-files:
+        description: 'Additional files to include in the artifact (space-separated, relative to repo root)'
+        type: string
+        default: ''
+      platforms:
+        description: 'JSON array of platforms to build (e.g. [{"goos":"linux","goarch":"amd64","artifact-suffix":"linux-x64"}])'
+        type: string
+        default: '[{"goos":"linux","goarch":"amd64","artifact-suffix":"linux-x64"},{"goos":"linux","goarch":"arm64","artifact-suffix":"linux-arm64"}]'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        include: ${{ fromJSON(inputs.platforms) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Build
+        env:
+          CGO_ENABLED: '0'
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: >-
+          go build
+          -ldflags "${{ inputs.ldflags }} -X main.version=${{ inputs.version }}"
+          -o publish/${{ inputs.binary-name }}
+          ${{ inputs.build-package }}
+      - if: inputs.extra-files != ''
+        name: Copy extra files
+        run: |
+          for f in ${{ inputs.extra-files }}; do
+            cp "$f" publish/
+          done
+      - uses: actions/upload-artifact@v7
+        with:
+          name: publish-${{ matrix.artifact-suffix }}
+          path: publish/
+          retention-days: 1

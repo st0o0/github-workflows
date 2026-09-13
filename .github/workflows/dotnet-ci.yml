@@ -38,7 +38,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
+          key: nuget-${{ runner.os }}-${{ hashFiles(format('{0}/**/*.csproj', inputs.solution-path), format('{0}/Directory.Packages.props', inputs.solution-path)) }}
           restore-keys: nuget-${{ runner.os }}-
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
@@ -75,7 +75,7 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: nuget-${{ runner.os }}-${{ hashFiles('src/**/*.csproj', 'src/Directory.Packages.props') }}
+          key: nuget-${{ runner.os }}-${{ hashFiles(format('{0}/**/*.csproj', inputs.solution-path), format('{0}/Directory.Packages.props', inputs.solution-path)) }}
           restore-keys: nuget-${{ runner.os }}-
       - if: inputs.has-dockerfile
         uses: hadolint/hadolint-action@v3.5.0

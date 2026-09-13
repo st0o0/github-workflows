@@ -1,0 +1,47 @@
+name: pnpm Build
+
+on:
+  workflow_call:
+    inputs:
+      project-path:
+        description: Path to the pnpm project directory
+        type: string
+        required: true
+      node-version:
+        description: Node.js version
+        type: string
+        default: '22'
+      artifact-name:
+        description: Name for the uploaded build artifact
+        type: string
+        default: 'ui-dist'
+      dist-path:
+        description: Path to build output directory (relative to project-path)
+        type: string
+        default: 'dist'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: pnpm
+          cache-dependency-path: ${{ inputs.project-path }}/pnpm-lock.yaml
+      - name: Install
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        working-directory: ${{ inputs.project-path }}
+        run: pnpm build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.project-path }}/${{ inputs.dist-path }}/
+          retention-days: 1
