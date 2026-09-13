@@ -1,4 +1,4 @@
-name: pnpm CI
+name: Frontend CI
 
 on:
   workflow_call:
@@ -25,7 +25,7 @@ on:
         default: false
 
 jobs:
-  ci:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
