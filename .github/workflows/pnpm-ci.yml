@@ -10,7 +10,7 @@ on:
       node-version:
         description: Node.js version
         type: string
-        default: '22'
+        default: '24'
       lint:
         description: Run pnpm lint
         type: boolean
@@ -33,6 +33,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ${{ inputs.project-path }}/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
