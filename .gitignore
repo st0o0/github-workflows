@@ -1,0 +1,12 @@
+# Claude Code
+.claude/
+
+# Worktrees
+.worktrees/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~
