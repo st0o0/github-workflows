@@ -1,5 +1,7 @@
 # github-workflows
 
+[![Release](https://img.shields.io/github/v/release/st0o0/github-workflows?sort=semver&style=flat-square)](https://github.com/st0o0/github-workflows/releases)
+
 Reusable GitHub Actions workflows for st0o0 repositories.
 
 ## Versioning
