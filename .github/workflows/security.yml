@@ -11,6 +11,10 @@ on:
         description: Image name for the Trivy scan (only used when scan-type is image)
         type: string
         default: 'app'
+      skip-dirs:
+        description: Comma-separated directories to exclude from the fs scan (e.g. docs site dependencies not shipped in the product)
+        type: string
+        default: 'docs'
 
 jobs:
   trivy-image:
@@ -32,9 +36,11 @@ jobs:
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.docker-image-name }}:scan
+          scanners: vuln,secret
           format: sarif
           output: trivy.sarif
           severity: CRITICAL,HIGH
+          ignore-unfixed: true
           exit-code: '0'
       - if: always() && hashFiles('trivy.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
@@ -54,9 +60,12 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
+          skip-dirs: ${{ inputs.skip-dirs }}
+          scanners: vuln,secret,misconfig
           format: sarif
           output: trivy.sarif
           severity: CRITICAL,HIGH
+          ignore-unfixed: true
           exit-code: '0'
       - if: always() && hashFiles('trivy.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4

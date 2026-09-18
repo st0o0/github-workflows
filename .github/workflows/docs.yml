@@ -10,7 +10,7 @@ on:
       node-version:
         description: Node.js version
         type: string
-        default: '22'
+        default: '24'
       needs-dotnet-build:
         description: Run dotnet build before VitePress (for XML doc generation)
         type: boolean
