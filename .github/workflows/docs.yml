@@ -39,6 +39,8 @@ jobs:
       - if: inputs.needs-dotnet-build
         run: dotnet build ${{ inputs.dotnet-project-path }}
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: ${{ inputs.docs-path }}/package.json
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ inputs.node-version }}
