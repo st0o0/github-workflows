@@ -48,12 +48,11 @@ jobs:
         run: >-
           dotnet test --solution ${{ inputs.solution-file }} --no-build
           --coverage --coverage-output-format cobertura
-          --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
       - uses: danielpalme/ReportGenerator-GitHub-Action@5
         if: always()
         with:
-          reports: '${{ github.workspace }}/testresults/**/coverage.cobertura.xml'
+          reports: '${{ github.workspace }}/testresults/**/*.cobertura.xml'
           targetdir: ./coveragereport
           reporttypes: MarkdownSummaryGithub
       - if: always()
