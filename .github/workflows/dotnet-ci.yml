@@ -36,7 +36,9 @@ jobs:
         with:
           global-json-file: ${{ inputs.solution-path }}/global.json
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
+          cache-dependency-path: |
+            **/packages.lock.json
+            **/*.csproj
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
@@ -69,7 +71,9 @@ jobs:
         with:
           global-json-file: ${{ inputs.solution-path }}/global.json
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
+          cache-dependency-path: |
+            **/packages.lock.json
+            **/*.csproj
       - if: inputs.has-dockerfile
         uses: hadolint/hadolint-action@v3.5.0
         with:
