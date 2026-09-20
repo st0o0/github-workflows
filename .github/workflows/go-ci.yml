@@ -47,7 +47,7 @@ jobs:
         with:
           version: ${{ inputs.golangci-lint-version }}
       - if: inputs.has-dockerfile
-        uses: hadolint/hadolint-action@v3.5.0
+        uses: hadolint/hadolint-action@v3
         with:
           dockerfile: Dockerfile
           config: .hadolint.yaml
@@ -67,6 +67,7 @@ jobs:
           push: false
           load: true
           tags: ${{ inputs.docker-image-name }}:ci
+          build-args: VERSION=0.0.0-ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - if: inputs.smoke-test-script != ''

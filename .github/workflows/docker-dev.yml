@@ -53,9 +53,14 @@ jobs:
           tags: |
             ${{ inputs.image-name }}:pr-${{ github.event.pull_request.number }}
             ${{ inputs.image-name }}:dev-${{ steps.vars.outputs.shortsha }}
+          labels: |
+            org.opencontainers.image.version=0.0.0-dev.${{ steps.vars.outputs.shortsha }}
+            org.opencontainers.image.revision=${{ github.event.pull_request.head.sha }}
           annotations: |
             index:org.opencontainers.image.description=${{ inputs.image-description }}
             index:org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            index:org.opencontainers.image.version=0.0.0-dev.${{ steps.vars.outputs.shortsha }}
+          build-args: VERSION=0.0.0-dev.${{ steps.vars.outputs.shortsha }}
           cache-from: type=gha,scope=dev
           cache-to: type=gha,scope=dev,mode=max
 
