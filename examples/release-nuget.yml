@@ -22,8 +22,6 @@ on:
   push:
     branches: [main]
 
-permissions: {}
-
 jobs:
   release-please:
     uses: st0o0/github-workflows/.github/workflows/release-please.yml@main
