@@ -1,0 +1,72 @@
+# Template: NuGet release workflow with OIDC Trusted Publishing
+#
+# Copy this file to .github/workflows/release.yml in your package repo.
+#
+# Prerequisites:
+#   1. GitHub Environment "nuget" created under repo Settings → Environments
+#   2. NuGet Trusted Publisher configured at nuget.org:
+#      - Repository: <your-org>/<your-repo>
+#      - Workflow: release.yml
+#      - Environment: nuget
+#   3. Repository secret NUGET_USER = NuGet username that owns the policy
+#
+# Why the publish job must live here (not in a reusable workflow):
+#   NuGet/login@v1 exchanges a GitHub OIDC token for a NuGet API key.
+#   The OIDC token's job_workflow_ref must match the Trusted Publisher policy.
+#   A reusable workflow would set job_workflow_ref to the workflow repo
+#   (github-workflows), not this repo — so the policy would never match.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release-please:
+    uses: st0o0/github-workflows/.github/workflows/release-please.yml@main
+    permissions:
+      contents: write
+      pull-requests: write
+
+  build:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: st0o0/github-workflows/.github/workflows/dotnet-build-nuget.yml@main
+    with:
+      version: ${{ needs.release-please.outputs.version }}
+      solution-path: src                    # adjust to your repo
+      solution-file: YourSolution.slnx      # adjust to your repo
+
+  publish:
+    needs: [release-please, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/Your.Package.Name  # adjust
+    steps:
+      - uses: actions/setup-dotnet@v6
+      - uses: actions/download-artifact@v8
+        with:
+          name: nuget-packages
+          path: ./packages
+      - uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - name: Push to NuGet
+        run: >-
+          dotnet nuget push
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate ./packages/*.nupkg
+      - name: Attach .nupkg to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.release-please.outputs.version }}
+        run: gh release upload "v${VERSION}" ./packages/*.nupkg --clobber
