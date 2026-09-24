@@ -44,11 +44,11 @@ jobs:
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build ${{ inputs.solution-file }} --no-restore
+        run: dotnet build ${{ inputs.solution-file }} --no-restore /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test --solution ${{ inputs.solution-file }} --no-build
+          dotnet test --solution ${{ inputs.solution-file }} --no-build --no-ansi
           --coverage --coverage-output-format cobertura
           --results-directory ${{ github.workspace }}/testresults
       - uses: danielpalme/ReportGenerator-GitHub-Action@5

@@ -15,6 +15,10 @@ on:
         description: Solution file name (sln/slnx)
         type: string
         required: true
+      locked-mode:
+        description: Use --locked-mode for restore (requires packages.lock.json)
+        type: boolean
+        default: true
     outputs:
       artifact-name:
         description: Name of the uploaded artifact containing .nupkg files
@@ -32,47 +36,38 @@ jobs:
         with:
           global-json-file: ${{ inputs.solution-path }}/global.json
           cache: true
-          cache-dependency-path: '**/packages.lock.json'
-      - run: dotnet tool restore
-
-      - name: Slopwatch
-        run: dotnet tool run slopwatch analyze --fail-on warning
+          cache-dependency-path: |
+            **/packages.lock.json
+            **/*.csproj
 
       - name: Restore
-        run: dotnet restore --locked-mode ${{ inputs.solution-path }}/${{ inputs.solution-file }}
-
+        working-directory: ${{ inputs.solution-path }}
+        run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
-        run: >-
-          dotnet build --configuration Release --no-restore
-          ${{ inputs.solution-path }}/${{ inputs.solution-file }}
-          /p:Version=${{ inputs.version }}
-          /p:ContinuousIntegrationBuild=true
-
+        working-directory: ${{ inputs.solution-path }}
+        run: dotnet build ${{ inputs.solution-file }} --no-restore /p:Version=${{ inputs.version }} /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test --solution ${{ inputs.solution-file }}
-          --configuration Release --no-ansi --no-build
+          dotnet test --solution ${{ inputs.solution-file }} --no-build --no-ansi
           --coverage --coverage-output-format cobertura
-          --coverage-output ${{ github.workspace }}/testresults/coverage.cobertura.xml
           --results-directory ${{ github.workspace }}/testresults
-
-      - name: Pack
-        run: >-
-          dotnet pack --configuration Release --no-build
-          --output ./packages
-          ${{ inputs.solution-path }}/${{ inputs.solution-file }}
-          /p:PackageVersion=${{ inputs.version }}
-          /p:PackageReleaseNotes="https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}"
-
       - uses: danielpalme/ReportGenerator-GitHub-Action@5
+        if: always()
         with:
-          reports: '${{ github.workspace }}/testresults/**/coverage.cobertura.xml'
+          reports: '${{ github.workspace }}/testresults/**/*.cobertura.xml'
           targetdir: ./coveragereport
           reporttypes: MarkdownSummaryGithub
-          tag: ${{ inputs.version }}
       - if: always()
         run: cat ./coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Pack
+        working-directory: ${{ inputs.solution-path }}
+        run: >-
+          dotnet pack ${{ inputs.solution-file }} --no-build
+          --output ${{ github.workspace }}/packages
+          /p:PackageVersion=${{ inputs.version }}
+          /p:PackageReleaseNotes="https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}"
 
       - uses: actions/upload-artifact@v7
         with:
