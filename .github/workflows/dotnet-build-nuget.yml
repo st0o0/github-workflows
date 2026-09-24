@@ -45,11 +45,11 @@ jobs:
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build ${{ inputs.solution-file }} --no-restore /p:Version=${{ inputs.version }} /p:ContinuousIntegrationBuild=true
+        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release /p:Version=${{ inputs.version }} /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet test --solution ${{ inputs.solution-file }} --no-build --no-ansi
+          dotnet test --solution ${{ inputs.solution-file }} --no-build --no-ansi --configuration Release
           --coverage --coverage-output-format cobertura
           --results-directory ${{ github.workspace }}/testresults
       - uses: danielpalme/ReportGenerator-GitHub-Action@5
@@ -64,7 +64,7 @@ jobs:
       - name: Pack
         working-directory: ${{ inputs.solution-path }}
         run: >-
-          dotnet pack ${{ inputs.solution-file }} --no-build
+          dotnet pack ${{ inputs.solution-file }} --no-build --configuration Release
           --output ${{ github.workspace }}/packages
           /p:PackageVersion=${{ inputs.version }}
           /p:PackageReleaseNotes="https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}"
@@ -72,4 +72,4 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: nuget-packages
-          path: ./packages/*.nupkg
+          path: ${{ github.workspace }}/packages/*.nupkg
