@@ -1,0 +1,24 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "**/*.md"
+          - "!CHANGELOG.md"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+          - "Dockerfile*"
+          - "docker-compose*"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/package.json"
+          - "**/pnpm-lock.yaml"
+          - "**/go.mod"
+          - "**/go.sum"
+          - "**/*.csproj"
+          - "**/Directory.Packages.props"
+          - "renovate.json"

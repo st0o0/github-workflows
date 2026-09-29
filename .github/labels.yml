@@ -1,0 +1,67 @@
+- name: "bug"
+  color: "fa113d"
+  description: "Something isn't working"
+
+- name: "feature"
+  color: "bada55"
+  description: "New feature or request"
+
+- name: "enhancement"
+  color: "acce55"
+  description: "Improvement to existing functionality"
+
+- name: "documentation"
+  color: "0ff1c3"
+  description: "Documentation changes"
+
+- name: "dependencies"
+  color: "c0ffee"
+  description: "Dependency updates"
+
+- name: "security"
+  color: "de1e7e"
+  description: "Security related changes"
+
+- name: "breaking-change"
+  color: "c01025"
+  description: "Introduces a breaking change"
+
+- name: "ci"
+  color: "5eabed"
+  description: "CI/CD pipeline changes"
+
+- name: "refactor"
+  color: "decade"
+  description: "Code refactoring"
+
+- name: "performance"
+  color: "c0ff33"
+  description: "Performance improvements"
+
+- name: "good first issue"
+  color: "10ca7e"
+  description: "Good for newcomers"
+
+- name: "help wanted"
+  color: "facade"
+  description: "Extra attention is needed"
+
+- name: "question"
+  color: "bad6e5"
+  description: "Further information is requested"
+
+- name: "stop-updating"
+  color: "dedede"
+  description: "Renovate: stop updating this PR"
+
+- name: "automerge"
+  color: "10aded"
+  description: "Renovate: automerge this PR"
+
+- name: "do-not-merge"
+  color: "1a1a1a"
+  description: "Do not merge this PR"
+
+- name: "wontfix"
+  color: "effec7"
+  description: "This will not be worked on"

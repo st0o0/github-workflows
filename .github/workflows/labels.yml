@@ -1,0 +1,22 @@
+name: Sync Labels
+
+on:
+  workflow_call:
+
+jobs:
+  sync:
+    name: Sync Labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout shared labels
+        uses: actions/checkout@v4
+        with:
+          repository: st0o0/github-workflows
+          sparse-checkout: .github/labels.yml
+          sparse-checkout-cone-mode: false
+
+      - name: Sync labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yml
+          delete-other-labels: true
