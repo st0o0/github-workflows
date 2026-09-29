@@ -19,15 +19,15 @@
   description: "Dependency updates"
 
 - name: "security"
-  color: "de1e7e"
+  color: "c21515"
   description: "Security related changes"
 
 - name: "breaking-change"
-  color: "c01025"
+  color: "de1e7e"
   description: "Introduces a breaking change"
 
 - name: "ci"
-  color: "5eabed"
+  color: "c0d1ce"
   description: "CI/CD pipeline changes"
 
 - name: "refactor"
@@ -35,7 +35,7 @@
   description: "Code refactoring"
 
 - name: "performance"
-  color: "c0ff33"
+  color: "fa5732"
   description: "Performance improvements"
 
 - name: "good first issue"
@@ -43,7 +43,7 @@
   description: "Good for newcomers"
 
 - name: "help wanted"
-  color: "facade"
+  color: "91ea5e"
   description: "Extra attention is needed"
 
 - name: "question"
@@ -61,6 +61,10 @@
 - name: "do-not-merge"
   color: "1a1a1a"
   description: "Do not merge this PR"
+
+- name: "dev-build"
+  color: "f00b42"
+  description: "Development build"
 
 - name: "wontfix"
   color: "effec7"
