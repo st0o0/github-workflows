@@ -12,13 +12,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout labeler config
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: st0o0/github-workflows
           sparse-checkout: .github/labeler.yml
           sparse-checkout-cone-mode: false
 
       - name: Apply labels
-        uses: actions/labeler@v5
+        uses: actions/labeler@v7
         with:
           configuration-path: .github/labeler.yml
