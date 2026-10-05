@@ -8,17 +8,68 @@ documentation:
 ci:
   - changed-files:
       - any-glob-to-any-file:
-          - ".github/**"
+          - ".github/workflows/**"
+          - ".github/labeler.yml"
+          - ".github/labels.yml"
+          - ".github/dependabot.yml"
+          - "commitlint.config.*"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
           - "Dockerfile*"
           - "docker-compose*"
+          - ".dockerignore"
+          - ".hadolint.yaml"
+
+go:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.go"
+          - "go.mod"
+          - "go.sum"
+          - ".golangci.yml"
+
+dotnet:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.cs"
+          - "**/*.csproj"
+          - "**/*.sln"
+          - "**/*.slnx"
+          - "Directory.Build.props"
+          - "Directory.Packages.props"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*_test.go"
+          - "**/*Tests.cs"
+          - "**/*Test.cs"
+          - "**/tests/**"
+          - "**/test/**"
+
+release:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "release-please-config.json"
+          - ".release-please-manifest.json"
+          - "CHANGELOG.md"
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/security.yml"
+          - ".github/workflows/codeql.yml"
+          - "**/*.sarif"
 
 dependencies:
   - changed-files:
       - any-glob-to-any-file:
           - "**/package.json"
           - "**/pnpm-lock.yaml"
-          - "**/go.mod"
-          - "**/go.sum"
+          - "go.mod"
+          - "go.sum"
           - "**/*.csproj"
-          - "**/Directory.Packages.props"
+          - "Directory.Packages.props"
           - "renovate.json"

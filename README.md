@@ -31,6 +31,8 @@ The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to 
 | `codeql.yml` | GitHub CodeQL analysis (any language) |
 | `security.yml` | Trivy Docker image scan + SARIF upload to Security tab |
 | `docs.yml` | VitePress build + GitHub Pages deploy |
+| `labeler.yml` | Path-based PR labeling (actions/labeler) |
+| `labels.yml` | Label definition sync (EndBug/label-sync) |
 
 ### Go
 
@@ -235,6 +237,40 @@ jobs:
     permissions:
       contents: read
       security-events: write
+```
+
+### Labels
+
+Both jobs need `permissions:` declared **on the calling job**, not just inside the reusable workflow — a reusable job can only be granted permissions the caller itself has, so omitting this block makes GitHub silently cap it at `pull-requests: none` and the run fails at startup with `Invalid workflow file`.
+
+```yaml
+# .github/workflows/labeler.yml
+name: PR Labeler
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  label:
+    uses: st0o0/github-workflows/.github/workflows/labeler.yml@v1
+    permissions:
+      contents: read
+      pull-requests: write
+```
+
+```yaml
+# .github/workflows/labels.yml
+name: Sync Labels
+on:
+  push:
+    branches: [main]
+    paths: ['.github/labels.yml']
+  workflow_dispatch:
+jobs:
+  sync:
+    uses: st0o0/github-workflows/.github/workflows/labels.yml@v1
+    permissions:
+      contents: read
+      issues: write
 ```
 
 ## release-please.yml Outputs

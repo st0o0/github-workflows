@@ -30,6 +30,26 @@
   color: "c0d1ce"
   description: "CI/CD pipeline changes"
 
+- name: "go"
+  color: "57ab1e"
+  description: "Go source changes"
+
+- name: "dotnet"
+  color: "5011de"
+  description: ".NET source changes"
+
+- name: "docker"
+  color: "d0c11e"
+  description: "Dockerfile or compose changes"
+
+- name: "tests"
+  color: "7e57ed"
+  description: "Test-only changes"
+
+- name: "release"
+  color: "5ea1ed"
+  description: "Release-please config or changelog"
+
 - name: "refactor"
   color: "decade"
   description: "Code refactoring"

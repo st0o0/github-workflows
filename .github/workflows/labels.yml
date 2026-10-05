@@ -7,6 +7,9 @@ jobs:
   sync:
     name: Sync Labels
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Checkout shared labels
         uses: actions/checkout@v7
