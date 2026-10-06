@@ -1,0 +1,68 @@
+name: Python CI
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version
+        type: string
+        default: '3.12'
+      project-path:
+        description: Path to the directory containing pyproject.toml / uv.lock
+        type: string
+        default: '.'
+      test-path:
+        description: Path passed to pytest, relative to project-path
+        type: string
+        default: 'tests'
+      lint:
+        description: Run ruff format --check + ruff check
+        type: boolean
+        default: true
+      all-extras:
+        description: Pass --all-extras to uv sync
+        type: boolean
+        default: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+          enable-cache: true
+          cache-dependency-glob: ${{ inputs.project-path }}/uv.lock
+      - name: Sync
+        working-directory: ${{ inputs.project-path }}
+        run: uv sync --locked ${{ inputs.all-extras && '--all-extras' || '' }}
+      - name: Test
+        working-directory: ${{ inputs.project-path }}
+        run: uv run pytest ${{ inputs.test-path }} -v --tb=short
+
+  lint:
+    if: inputs.lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+          enable-cache: true
+          cache-dependency-glob: ${{ inputs.project-path }}/uv.lock
+      - name: Sync
+        working-directory: ${{ inputs.project-path }}
+        run: uv sync --locked ${{ inputs.all-extras && '--all-extras' || '' }}
+      - name: Format check
+        working-directory: ${{ inputs.project-path }}
+        run: uv run ruff format --check .
+      - name: Lint
+        working-directory: ${{ inputs.project-path }}
+        run: uv run ruff check .

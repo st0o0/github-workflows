@@ -51,6 +51,12 @@ The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to 
 | `dotnet-release-nuget.yml` | Build + test + pack + NuGet push + GitHub Release asset |
 | `dotnet-dev-build.yml` | Label-gated PR dev image (per-RID, multi-arch manifest) |
 
+### Python
+
+| Workflow | Description |
+|---|---|
+| `python-ci.yml` | uv sync (locked) + pytest, ruff format/lint |
+
 ## Architecture: Release Flow
 
 Release-please is decoupled from build/publish workflows. Each consumer repo has a single `release.yml` with chained jobs:
@@ -214,6 +220,26 @@ jobs:
       checks: write
       id-token: write
 ```
+
+### Python app (e.g. ha-njord)
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [pull_request]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  python:
+    uses: st0o0/github-workflows/.github/workflows/python-ci.yml@v1
+  commitlint:
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
+```
+
+Projects that aren't published as a package (apps, HA custom components) set
+`package = false` under `[tool.uv]` in `pyproject.toml` so `uv sync` doesn't
+try to build a wheel.
 
 ### Security scan
 
