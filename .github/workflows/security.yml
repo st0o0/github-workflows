@@ -11,10 +11,15 @@ on:
         description: Image name for the Trivy scan (only used when scan-type is image)
         type: string
         default: 'app'
-      skip-dirs:
-        description: Comma-separated directories to exclude from the fs scan (e.g. docs site dependencies not shipped in the product)
+      trivy-config:
+        description: >-
+          Path to a trivy.yaml in the consumer repo for scan tuning (skip-files,
+          skip-dirs, etc.). severity/scanners/ignore-unfixed stay hardcoded below
+          and always win over trivy.yaml (Trivy/Viper precedence) — only keys
+          this workflow doesn't already set explicitly take effect from the
+          config file.
         type: string
-        default: 'docs'
+        default: ''
 
 jobs:
   trivy-image:
@@ -36,6 +41,7 @@ jobs:
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.docker-image-name }}:scan
+          trivy-config: ${{ inputs.trivy-config }}
           scanners: vuln,secret
           format: sarif
           output: trivy.sarif
@@ -60,7 +66,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
-          skip-dirs: ${{ inputs.skip-dirs }}
+          trivy-config: ${{ inputs.trivy-config }}
           scanners: vuln,secret,misconfig
           format: sarif
           output: trivy.sarif
