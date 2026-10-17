@@ -21,7 +21,7 @@ The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to 
 
 | Workflow | Description |
 |---|---|
-| `release-please.yml` | Standalone release-please — creates PRs and GitHub Releases from conventional commits |
+| `release-please.yml` | Standalone release-please, creates PRs and GitHub Releases from conventional commits |
 
 ### Shared
 
@@ -104,8 +104,8 @@ Adding a new component: add lines to the mapping step + a new downstream job.
 ### Prerequisites
 
 Every consumer repo needs:
-- `release-please-config.json` — release-please configuration
-- `.release-please-manifest.json` — version tracking
+- `release-please-config.json`: release-please configuration
+- `.release-please-manifest.json`: version tracking
 
 ### Go Docker app (e.g. bifrost)
 
@@ -267,7 +267,7 @@ jobs:
 
 ### Labels
 
-Both jobs need `permissions:` declared **on the calling job**, not just inside the reusable workflow — a reusable job can only be granted permissions the caller itself has, so omitting this block makes GitHub silently cap it at `pull-requests: none` and the run fails at startup with `Invalid workflow file`.
+Both jobs need `permissions:` declared **on the calling job**, not just inside the reusable workflow, since a reusable job can only be granted permissions the caller itself has, so omitting this block makes GitHub silently cap it at `pull-requests: none` and the run fails at startup with `Invalid workflow file`.
 
 ```yaml
 # .github/workflows/labeler.yml

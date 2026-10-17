@@ -14,7 +14,7 @@
 #   NuGet/login@v1 exchanges a GitHub OIDC token for a NuGet API key.
 #   The OIDC token's job_workflow_ref must match the Trusted Publisher policy.
 #   A reusable workflow would set job_workflow_ref to the workflow repo
-#   (github-workflows), not this repo — so the policy would never match.
+#   (github-workflows), not this repo, so the policy would never match.
 
 name: Release
 

@@ -15,7 +15,7 @@ on:
         description: >-
           Path to a trivy.yaml in the consumer repo for scan tuning (skip-files,
           skip-dirs, etc.). severity/scanners/ignore-unfixed stay hardcoded below
-          and always win over trivy.yaml (Trivy/Viper precedence) — only keys
+          and always win over trivy.yaml (Trivy/Viper precedence): only keys
           this workflow doesn't already set explicitly take effect from the
           config file.
         type: string
