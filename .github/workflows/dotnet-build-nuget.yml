@@ -4,9 +4,9 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Semantic version to publish (e.g. 0.2.0)
+        description: Semantic version to publish (e.g. 0.2.0). Leave empty to use the version from each csproj (independent per-package versions).
         type: string
-        required: true
+        default: ''
       solution-path:
         description: Path to the solution directory
         type: string
@@ -45,7 +45,7 @@ jobs:
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release /p:Version=${{ inputs.version }} /p:ContinuousIntegrationBuild=true
+        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release ${{ inputs.version != '' && format('/p:Version={0}', inputs.version) || '' }} /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
@@ -66,8 +66,8 @@ jobs:
         run: >-
           dotnet pack ${{ inputs.solution-file }} --no-build --configuration Release
           --output ${{ github.workspace }}/packages
-          /p:PackageVersion=${{ inputs.version }}
-          /p:PackageReleaseNotes="https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }}"
+          ${{ inputs.version != '' && format('/p:PackageVersion={0}', inputs.version) || '' }}
+          ${{ inputs.version != '' && format('/p:PackageReleaseNotes="https://github.com/{0}/releases/tag/v{1}"', github.repository, inputs.version) || '' }}
 
       - uses: actions/upload-artifact@v7
         with:
