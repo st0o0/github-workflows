@@ -4,7 +4,11 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Semantic version to publish (e.g. 0.2.0). Leave empty to use the version from each csproj (independent per-package versions).
+        description: Semantic version to publish (e.g. 0.2.0). Leave empty for repos with independent per-package versions and pass them via msbuild-properties.
+        type: string
+        default: ''
+      msbuild-properties:
+        description: Extra MSBuild arguments for build and pack (e.g. "/p:FooVersion=1.2.0 /p:BarVersion=0.3.0"). Must come from a trusted source.
         type: string
         default: ''
       solution-path:
@@ -45,7 +49,7 @@ jobs:
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release ${{ inputs.version != '' && format('/p:Version={0}', inputs.version) || '' }} /p:ContinuousIntegrationBuild=true
+        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release ${{ inputs.version != '' && format('/p:Version={0}', inputs.version) || '' }} ${{ inputs.msbuild-properties }} /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
@@ -67,6 +71,7 @@ jobs:
           dotnet pack ${{ inputs.solution-file }} --no-build --configuration Release
           --output ${{ github.workspace }}/packages
           ${{ inputs.version != '' && format('/p:PackageVersion={0}', inputs.version) || '' }}
+          ${{ inputs.msbuild-properties }}
           ${{ inputs.version != '' && format('/p:PackageReleaseNotes="https://github.com/{0}/releases/tag/v{1}"', github.repository, inputs.version) || '' }}
 
       - uses: actions/upload-artifact@v7
