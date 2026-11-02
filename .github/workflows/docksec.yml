@@ -62,6 +62,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Create placeholder Dockerfile for compose-only scan
+        run: '[ -f Dockerfile ] || echo "FROM scratch" > Dockerfile'
+
       - name: Run DockSec
         uses: OWASP/DockSec@v2026.9.21
         with:
