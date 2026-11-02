@@ -63,11 +63,12 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Create placeholder Dockerfile for compose-only scan
-        run: '[ -f Dockerfile ] || echo "FROM scratch" > Dockerfile'
+        run: echo "FROM scratch" > .docksec-placeholder.Dockerfile
 
       - name: Run DockSec
         uses: OWASP/DockSec@v2026.9.21
         with:
+          dockerfile: .docksec-placeholder.Dockerfile
           compose: ${{ inputs.target }}
           scan_only: 'true'
           severity: ${{ inputs.severity }}
