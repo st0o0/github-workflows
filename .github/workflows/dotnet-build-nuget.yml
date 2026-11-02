@@ -49,7 +49,11 @@ jobs:
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
-        run: dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release ${{ inputs.version != '' && format('/p:Version={0}', inputs.version) || '' }} ${{ inputs.msbuild-properties }} /p:ContinuousIntegrationBuild=true
+        run: >-
+          dotnet build ${{ inputs.solution-file }} --no-restore --configuration Release
+          ${{ inputs.version != '' && format('/p:Version={0}', inputs.version) || '' }}
+          ${{ inputs.msbuild-properties }}
+          /p:ContinuousIntegrationBuild=true
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
