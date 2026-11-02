@@ -49,14 +49,16 @@ jobs:
       - name: Sanitize SARIF severity values
         if: always() && hashFiles('docksec-results/**/*.sarif') != ''
         run: |
-          find docksec-results -name '*.sarif' -exec sed -i \
+          mkdir -p /tmp/docksec-sarif
+          cp docksec-results/*.sarif /tmp/docksec-sarif/ 2>/dev/null || true
+          find /tmp/docksec-sarif -name '*.sarif' -exec sed -i \
             's/"security-severity": "N\/A"/"security-severity": "0.0"/g' {} +
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
-        if: always() && hashFiles('docksec-results/**/*.sarif') != ''
+        if: always() && hashFiles('/tmp/docksec-sarif/*.sarif') != ''
         with:
-          sarif_file: docksec-results
+          sarif_file: /tmp/docksec-sarif
           category: docksec-dockerfile
 
   docksec-compose:
@@ -85,14 +87,16 @@ jobs:
       - name: Sanitize SARIF severity values
         if: always() && hashFiles('docksec-results/**/*.sarif') != ''
         run: |
-          find docksec-results -name '*.sarif' -exec sed -i \
+          mkdir -p /tmp/docksec-sarif
+          cp docksec-results/*.sarif /tmp/docksec-sarif/ 2>/dev/null || true
+          find /tmp/docksec-sarif -name '*.sarif' -exec sed -i \
             's/"security-severity": "N\/A"/"security-severity": "0.0"/g' {} +
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
-        if: always() && hashFiles('docksec-results/**/*.sarif') != ''
+        if: always() && hashFiles('/tmp/docksec-sarif/*.sarif') != ''
         with:
-          sarif_file: docksec-results
+          sarif_file: /tmp/docksec-sarif
           category: docksec-compose
 
   trivy-fs:
