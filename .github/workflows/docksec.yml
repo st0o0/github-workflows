@@ -46,6 +46,12 @@ jobs:
           sarif: 'true'
           output_dir: ${{ github.workspace }}/docksec-results
 
+      - name: Sanitize SARIF severity values
+        if: always() && hashFiles('docksec-results/**/*.sarif') != ''
+        run: |
+          find docksec-results -name '*.sarif' -exec sed -i \
+            's/"security-severity": "N\/A"/"security-severity": "0.0"/g' {} +
+
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('docksec-results/**/*.sarif') != ''
@@ -75,6 +81,12 @@ jobs:
           fail_on: ${{ inputs.fail-on }}
           sarif: 'true'
           output_dir: ${{ github.workspace }}/docksec-results
+
+      - name: Sanitize SARIF severity values
+        if: always() && hashFiles('docksec-results/**/*.sarif') != ''
+        run: |
+          find docksec-results -name '*.sarif' -exec sed -i \
+            's/"security-severity": "N\/A"/"security-severity": "0.0"/g' {} +
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
