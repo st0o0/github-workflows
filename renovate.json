@@ -6,7 +6,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.github/workflows/go-ci\\.yml$"],
+      "managerFilePatterns": [
+        "/\\.github/workflows/go-ci\\.yml$/"
+      ],
       "matchStrings": [
         "golangci-lint-version[\\s\\S]*?default:\\s*'(?<currentValue>v[\\d.]+)'"
       ],
