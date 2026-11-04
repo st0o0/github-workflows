@@ -2,17 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>st0o0/renovate-config:github-actions"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.github/workflows/go-ci\\.yml$"],
-      "matchStrings": [
-        "golangci-lint-version[\\s\\S]*?default:\\s*'(?<currentValue>v[\\d.]+)'"
-      ],
-      "depNameTemplate": "golangci/golangci-lint",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>.+)$"
-    }
   ]
 }

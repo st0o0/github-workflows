@@ -3,10 +3,6 @@ name: Go CI
 on:
   workflow_call:
     inputs:
-      golangci-lint-version:
-        description: golangci-lint version
-        type: string
-        default: 'v2.12'
       has-dockerfile:
         description: Build and lint Dockerfile
         type: boolean
@@ -44,8 +40,6 @@ jobs:
         with:
           go-version-file: go.mod
       - uses: golangci/golangci-lint-action@v9
-        with:
-          version: ${{ inputs.golangci-lint-version }}
       - if: inputs.has-dockerfile
         uses: hadolint/hadolint-action@v3.5.0
         with:
