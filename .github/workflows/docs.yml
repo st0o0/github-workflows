@@ -42,6 +42,10 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: ${{ inputs.dotnet-project-path }}/global.json
+          cache: true
+          cache-dependency-path: |
+            **/packages.lock.json
+            **/*.csproj
       - if: inputs.needs-dotnet-build
         run: dotnet build ${{ inputs.dotnet-project-path }}
       - uses: pnpm/action-setup@v6
@@ -51,7 +55,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: pnpm
-          cache-dependency-path: ${{ inputs.docs-path }}
+          cache-dependency-path: ${{ inputs.docs-path }}/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
         working-directory: ${{ inputs.docs-path }}
       - run: pnpm run build
