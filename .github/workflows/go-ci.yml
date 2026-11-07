@@ -39,6 +39,8 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
+      - name: Check go.mod and go.sum are tidy
+        run: go mod tidy -diff
       - uses: golangci/golangci-lint-action@v9
       - if: inputs.has-dockerfile
         uses: hadolint/hadolint-action@v3.5.0
