@@ -39,12 +39,18 @@ jobs:
           cache-dependency-path: |
             **/packages.lock.json
             **/*.csproj
+      - name: CI setup hook
+        uses: ./.github/actions/ci-setup
+        if: hashFiles('.github/actions/ci-setup/action.yml') != ''
       - name: Restore
         working-directory: ${{ inputs.solution-path }}
         run: dotnet restore ${{ inputs.solution-file }} ${{ inputs.locked-mode && '--locked-mode' || '' }}
       - name: Build
         working-directory: ${{ inputs.solution-path }}
         run: dotnet build ${{ inputs.solution-file }} --no-restore /p:ContinuousIntegrationBuild=true
+      - name: CI post-build hook
+        uses: ./.github/actions/ci-post-build
+        if: hashFiles('.github/actions/ci-post-build/action.yml') != ''
       - name: Test
         working-directory: ${{ inputs.solution-path }}
         run: >-
