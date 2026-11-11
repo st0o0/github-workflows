@@ -66,7 +66,7 @@ jobs:
           dotnet test --solution ${{ inputs.solution-file }} --no-build --no-ansi --configuration Release
           --coverage --coverage-output-format cobertura
           --results-directory ${{ github.workspace }}/testresults
-      - uses: danielpalme/ReportGenerator-GitHub-Action@5
+      - uses: danielpalme/ReportGenerator-GitHub-Action@v5
         if: always()
         with:
           reports: '${{ github.workspace }}/testresults/**/*.cobertura.xml'
