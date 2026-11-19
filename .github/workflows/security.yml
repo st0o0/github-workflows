@@ -4,13 +4,22 @@ on:
   workflow_call:
     inputs:
       scan-type:
-        description: "Scan type: 'image' for Docker image scan, 'fs' for filesystem/dependency scan"
+        description: >-
+          Scan type: 'image' builds a local Docker image and scans it,
+          'registry-image' scans an already-pushed registry image (requires image-ref),
+          'fs' scans the filesystem/dependencies directly.
         type: string
         default: 'image'
       docker-image-name:
-        description: Image name for the Trivy scan (only used when scan-type is image)
+        description: Image name for the local Docker build (only used when scan-type is image)
         type: string
         default: 'app'
+      image-ref:
+        description: >-
+          Full registry image reference to scan (e.g. ghcr.io/st0o0/app:latest).
+          Only used when scan-type is registry-image.
+        type: string
+        default: ''
       trivy-config:
         description: >-
           Path to a trivy.yaml in the consumer repo for scan tuning (skip-files,
@@ -53,6 +62,34 @@ jobs:
         with:
           sarif_file: trivy.sarif
           category: trivy-image
+
+  trivy-registry-image:
+    if: inputs.scan-type == 'registry-image'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      security-events: write
+    steps:
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ inputs.image-ref }}
+          trivy-config: ${{ inputs.trivy-config }}
+          scanners: vuln,secret
+          format: sarif
+          output: trivy.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
+      - if: always() && hashFiles('trivy.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-registry-image
 
   trivy-fs:
     if: inputs.scan-type == 'fs'
