@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
       security-events: write
     steps:
       - uses: actions/checkout@v7
@@ -67,6 +68,7 @@ jobs:
     if: inputs.scan-type == 'registry-image'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: read
       security-events: write
     steps:
@@ -96,6 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
       security-events: write
     steps:
       - uses: actions/checkout@v7
