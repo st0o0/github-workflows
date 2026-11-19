@@ -4,22 +4,13 @@ on:
   workflow_call:
     inputs:
       scan-type:
-        description: >-
-          Scan type: 'image' builds a local Docker image and scans it,
-          'registry-image' scans an already-pushed registry image (requires image-ref),
-          'fs' scans the filesystem/dependencies directly.
+        description: "Scan type: 'image' builds a local Docker image and scans it, 'fs' scans the filesystem/dependencies directly."
         type: string
         default: 'image'
       docker-image-name:
         description: Image name for the local Docker build (only used when scan-type is image)
         type: string
         default: 'app'
-      image-ref:
-        description: >-
-          Full registry image reference to scan (e.g. ghcr.io/st0o0/app:latest).
-          Only used when scan-type is registry-image.
-        type: string
-        default: ''
       trivy-config:
         description: >-
           Path to a trivy.yaml in the consumer repo for scan tuning (skip-files,
@@ -36,7 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
       security-events: write
     steps:
       - uses: actions/checkout@v7
@@ -64,51 +54,11 @@ jobs:
           sarif_file: trivy.sarif
           category: trivy-image
 
-  trivy-registry-image:
-    if: inputs.scan-type == 'registry-image'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-      security-events: write
-    steps:
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check image exists
-        id: check
-        run: |
-          if docker manifest inspect "${{ inputs.image-ref }}" > /dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Image ${{ inputs.image-ref }} not found in registry — skipping scan"
-          fi
-      - if: steps.check.outputs.exists == 'true'
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: ${{ inputs.image-ref }}
-          trivy-config: ${{ inputs.trivy-config }}
-          scanners: vuln,secret
-          format: sarif
-          output: trivy.sarif
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-      - if: always() && steps.check.outputs.exists == 'true' && hashFiles('trivy.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: trivy.sarif
-          category: trivy-registry-image
-
   trivy-fs:
     if: inputs.scan-type == 'fs'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
       security-events: write
     steps:
       - uses: actions/checkout@v7
