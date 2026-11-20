@@ -101,4 +101,4 @@ jobs:
         run: dotnet tool restore
       - if: inputs.slopwatch
         name: Slopwatch
-        run: slopwatch analyze -d . --fail-on error
+        run: dotnet slopwatch analyze -d . --fail-on error
