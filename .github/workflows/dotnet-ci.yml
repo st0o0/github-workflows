@@ -23,6 +23,10 @@ on:
         description: Use --locked-mode for restore (requires packages.lock.json)
         type: boolean
         default: true
+      slopwatch:
+        description: Run Slopwatch analysis to detect LLM reward-hacking patterns (requires .config/dotnet-tools.json with Slopwatch.Cmd)
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -92,3 +96,9 @@ jobs:
       - if: inputs.check-format
         working-directory: ${{ inputs.solution-path }}
         run: dotnet format ${{ inputs.solution-file }} whitespace --no-restore --verify-no-changes
+      - if: inputs.slopwatch
+        name: Restore tools
+        run: dotnet tool restore
+      - if: inputs.slopwatch
+        name: Slopwatch
+        run: slopwatch analyze -d . --fail-on error
