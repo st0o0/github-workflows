@@ -28,6 +28,11 @@ on:
         description: Name of the uploaded artifact containing .nupkg files
         value: nuget-packages
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: "1"
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -28,6 +28,11 @@ on:
         type: boolean
         default: false
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  TESTINGPLATFORM_TELEMETRY_OPTOUT: "1"
+
 jobs:
   test:
     runs-on: ubuntu-latest
