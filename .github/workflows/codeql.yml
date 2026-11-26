@@ -8,6 +8,11 @@ on:
         type: string
         required: true
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_NOLOGO: "1"
+  GOTELEMETRY: "off"
+
 jobs:
   analyze:
     runs-on: ubuntu-latest
