@@ -24,11 +24,6 @@ on:
         type: number
         default: 1
 
-env:
-  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
-  DOTNET_NOLOGO: "1"
-  TESTINGPLATFORM_TELEMETRY_OPTOUT: "1"
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -53,6 +48,9 @@ jobs:
             **/*.csproj
       - if: inputs.needs-dotnet-build
         run: dotnet build ${{ inputs.dotnet-project-path }}
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+          DOTNET_NOLOGO: "1"
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: ${{ inputs.docs-path }}/package.json

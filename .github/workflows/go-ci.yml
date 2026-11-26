@@ -16,6 +16,9 @@ on:
         type: string
         default: 'app'
 
+env:
+  GOTELEMETRY: "off"
+
 jobs:
   unit:
     runs-on: ubuntu-latest
