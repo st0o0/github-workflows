@@ -7,13 +7,19 @@ Reusable GitHub Actions workflows for st0o0 repositories.
 ## Versioning
 
 This repo uses [release-please](https://github.com/googleapis/release-please) with semantic versioning.
-Consumers should pin to a **major version tag**:
+Consumers should pin to an **exact release tag** and let Renovate keep it current:
+
+<!-- x-release-please-start-version -->
 
 ```yaml
-uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1
+uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1.0.0
 ```
 
-The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to `@v2`.
+With the shared [`st0o0/renovate-config`](https://github.com/st0o0/renovate-config) preset, Renovate pins the tag to its commit SHA and opens a PR for every new release. Minor and patch releases are automerged once CI passes; major releases (breaking changes) need a manual merge.
+
+A moving `v1` tag that tracks the latest `v1.x.x` release is also published for repos without Renovate.
+
+Dependency updates in this repo are committed as `fix(deps):` so that they produce a release and reach consumers.
 
 ## Workflows
 
@@ -28,28 +34,38 @@ The `@v1` tag tracks the latest `v1.x.x` release. Breaking changes will bump to 
 | Workflow | Description |
 |---|---|
 | `commitlint.yml` | Commit message validation via wagoid/commitlint |
-| `codeql.yml` | GitHub CodeQL analysis (any language) |
-| `security.yml` | Trivy Docker image scan + SARIF upload to Security tab |
+| `security.yml` | Trivy scan of a locally built Docker image or of the filesystem + SARIF upload to Security tab |
 | `docs.yml` | VitePress build + GitHub Pages deploy |
 | `labeler.yml` | Path-based PR labeling (actions/labeler) |
 | `labels.yml` | Label definition sync (EndBug/label-sync) |
+
+### Docker
+
+| Workflow | Description |
+|---|---|
+| `docker-release.yml` | Multi-arch Docker build + push to GHCR with SBOM and provenance + cosign signing |
+| `docker-dev.yml` | PR dev image pushed to GHCR as `pr-<number>`, cosign-signed, pull command posted as PR comment |
 
 ### Go
 
 | Workflow | Description |
 |---|---|
-| `go-ci.yml` | Lint (golangci-lint), test, build, vulncheck, security |
-| `go-release-docker.yml` | Multi-arch Docker build + push to GHCR + cosign signing |
-| `go-dev-build.yml` | Label-gated PR dev image (single-stage Docker) |
+| `go-ci.yml` | Tests (race), go.mod tidy check, golangci-lint, hadolint, Docker build + optional smoke test |
 
 ### .NET
 
 | Workflow | Description |
 |---|---|
-| `dotnet-ci.yml` | Build, test, security (Trivy + CodeQL) |
-| `dotnet-release-docker.yml` | Per-RID publish + multi-arch Docker + cosign signing |
-| `dotnet-release-nuget.yml` | Build + test + pack + NuGet push + GitHub Release asset |
-| `dotnet-dev-build.yml` | Label-gated PR dev image (per-RID, multi-arch manifest) |
+| `dotnet-ci.yml` | Build, test with coverage report, hadolint, format check, optional Slopwatch |
+| `dotnet-build-nuget.yml` | Build + test + pack, uploads the `.nupkg` files as `nuget-packages` artifact |
+
+`dotnet-ci.yml` and `dotnet-build-nuget.yml` run the optional composite actions `.github/actions/ci-setup` and `.github/actions/ci-post-build` from the **consumer repo** if they exist.
+
+### Frontend
+
+| Workflow | Description |
+|---|---|
+| `frontend-ci.yml` | pnpm install + lint, typecheck and optional tests |
 
 ### Python
 
@@ -118,9 +134,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ci:
-    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@v1.0.0
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.0
 ```
 
 ```yaml
@@ -135,14 +151,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release-please:
-    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.0
     permissions:
       contents: write
       pull-requests: write
   docker:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    uses: st0o0/github-workflows/.github/workflows/go-release-docker.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.0
     with:
       version: ${{ needs.release-please.outputs.version }}
       image-name: ghcr.io/st0o0/bifrost
@@ -167,59 +183,57 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release-please:
-    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.0
     permissions:
       contents: write
       pull-requests: write
   docker:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    uses: st0o0/github-workflows/.github/workflows/dotnet-release-docker.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.0
     with:
       version: ${{ needs.release-please.outputs.version }}
       image-name: ghcr.io/st0o0/njord
       image-description: Multi-model weather intelligence for Home Assistant
-      solution-file: Njord.slnx
-      publish-project: Njord/Njord.csproj
+      platforms: linux/amd64,linux/arm64,linux/arm/v7
     permissions:
       contents: read
       packages: write
       id-token: write
 ```
 
-### NuGet library (e.g. Flickr.Net)
+### Dev image for a PR
+
+The reusable workflow builds on every call; gate it in the consumer repo, e.g. on a `dev-build` label:
 
 ```yaml
-# .github/workflows/release.yml
-name: Release
+# .github/workflows/dev-build.yml
+name: Dev Build
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize, reopened]
 concurrency:
-  group: release
-  cancel-in-progress: false
+  group: dev-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 jobs:
-  release-please:
-    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1
-    permissions:
-      contents: write
-      pull-requests: write
-  nuget:
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
-    uses: st0o0/github-workflows/.github/workflows/dotnet-release-nuget.yml@v1
+  docker:
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'dev-build') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    uses: st0o0/github-workflows/.github/workflows/docker-dev.yml@v1.0.0
     with:
-      version: ${{ needs.release-please.outputs.version }}
-      solution-file: Flickr.Net.slnx
-      package-name: Flickr.Net
-    secrets:
-      NUGET_USER: ${{ secrets.NUGET_USER }}
+      image-name: ghcr.io/st0o0/bifrost
+      image-description: Dev build of bifrost
     permissions:
-      contents: write
-      checks: write
+      contents: read
+      packages: write
+      pull-requests: write
       id-token: write
 ```
+
+### NuGet library (e.g. Flickr.Net)
+
+`dotnet-build-nuget.yml` only builds, tests and packs. The publish job must live in the consumer repo, because NuGet Trusted Publishing checks the workflow that requests the OIDC token. Copy [`examples/release-nuget.yml`](examples/release-nuget.yml) as a starting point.
 
 ### Python app (e.g. ha-njord)
 
@@ -232,9 +246,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   python:
-    uses: st0o0/github-workflows/.github/workflows/python-ci.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/python-ci.yml@v1.0.0
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.0
 ```
 
 Projects that aren't published as a package (apps, HA custom components) set
@@ -257,7 +271,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   scan:
-    uses: st0o0/github-workflows/.github/workflows/security.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/security.yml@v1.0.0
     with:
       docker-image-name: bifrost
     permissions:
@@ -277,7 +291,7 @@ on:
     types: [opened, synchronize]
 jobs:
   label:
-    uses: st0o0/github-workflows/.github/workflows/labeler.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/labeler.yml@v1.0.0
     permissions:
       contents: read
       pull-requests: write
@@ -293,11 +307,13 @@ on:
   workflow_dispatch:
 jobs:
   sync:
-    uses: st0o0/github-workflows/.github/workflows/labels.yml@v1
+    uses: st0o0/github-workflows/.github/workflows/labels.yml@v1.0.0
     permissions:
       contents: read
       issues: write
 ```
+
+<!-- x-release-please-end -->
 
 ## release-please.yml Outputs
 
