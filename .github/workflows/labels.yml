@@ -12,14 +12,14 @@ jobs:
       issues: write
     steps:
       - name: Checkout shared labels
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: st0o0/github-workflows
           sparse-checkout: .github/labels.yml
           sparse-checkout-cone-mode: false
 
       - name: Sync labels
-        uses: EndBug/label-sync@v2
+        uses: EndBug/label-sync@52074158190acb45f3077f9099fea818aa43f97a # v2
         with:
           config-file: .github/labels.yml
           delete-other-labels: true
