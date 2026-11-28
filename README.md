@@ -19,7 +19,7 @@ With the shared [`st0o0/renovate-config`](https://github.com/st0o0/renovate-conf
 
 A moving `v1` tag that tracks the latest `v1.x.x` release is also published for repos without Renovate.
 
-Dependency updates in this repo are committed as `fix(deps):` so that they produce a release and reach consumers.
+`chore` commits are listed in the changelog as well, so Renovate's `chore(deps):` updates in this repo produce a patch release and reach consumers.
 
 ## Workflows
 

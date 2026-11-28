@@ -6,7 +6,8 @@
       "changelog-sections": [
         { "type": "feat", "section": "Features" },
         { "type": "fix", "section": "Bug Fixes" },
-        { "type": "refactor", "section": "Refactors" }
+        { "type": "refactor", "section": "Refactors" },
+        { "type": "chore", "section": "Maintenance" }
       ],
       "extra-files": ["README.md", "examples/release-nuget.yml"]
     }
