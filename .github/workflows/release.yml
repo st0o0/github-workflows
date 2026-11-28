@@ -25,10 +25,10 @@ jobs:
       - name: Update major version tag
         if: ${{ steps.release.outputs.release_created }}
         env:
-          MAJOR: ${{ steps.release.outputs.major }}
           TAG: v${{ steps.release.outputs.major }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -fa "${TAG}" -m "Update ${TAG} to v${{ steps.release.outputs.tag_name }}"
+          git tag -fa "${TAG}" -m "Update ${TAG} to ${RELEASE_TAG}"
           git push origin "${TAG}" --force
