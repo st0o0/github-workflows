@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.1](https://github.com/st0o0/github-workflows/compare/v1.0.0...v1.0.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **ci:** drop duplicated v prefix in major tag message ([82d736f](https://github.com/st0o0/github-workflows/commit/82d736f9708e428fc82ae82556b5063710d68a0f))
+
+
+### Maintenance
+
+* commit Renovate updates as fix(deps) so they trigger a release ([a733465](https://github.com/st0o0/github-workflows/commit/a733465c3b1b7fde763d3d36e4ac6f289e5a371d))
+* release on chore commits instead of committing dependency updates as fix ([d48214c](https://github.com/st0o0/github-workflows/commit/d48214c43cb0f0f9053a64999875eefab91c0e62))
+
 ## 1.0.0 (2026-11-28)
 
 

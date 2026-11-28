@@ -12,7 +12,7 @@ Consumers should pin to an **exact release tag** and let Renovate keep it curren
 <!-- x-release-please-start-version -->
 
 ```yaml
-uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1.0.0
+uses: st0o0/github-workflows/.github/workflows/dotnet-ci.yml@v1.0.1
 ```
 
 With the shared [`st0o0/renovate-config`](https://github.com/st0o0/renovate-config) preset, Renovate pins the tag to its commit SHA and opens a PR for every new release. Minor and patch releases are automerged once CI passes; major releases (breaking changes) need a manual merge.
@@ -134,9 +134,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   ci:
-    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/go-ci.yml@v1.0.1
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.1
 ```
 
 ```yaml
@@ -151,14 +151,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release-please:
-    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.1
     permissions:
       contents: write
       pull-requests: write
   docker:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.1
     with:
       version: ${{ needs.release-please.outputs.version }}
       image-name: ghcr.io/st0o0/bifrost
@@ -183,14 +183,14 @@ concurrency:
   cancel-in-progress: false
 jobs:
   release-please:
-    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/release-please.yml@v1.0.1
     permissions:
       contents: write
       pull-requests: write
   docker:
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
-    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/docker-release.yml@v1.0.1
     with:
       version: ${{ needs.release-please.outputs.version }}
       image-name: ghcr.io/st0o0/njord
@@ -220,7 +220,7 @@ jobs:
     if: >-
       contains(github.event.pull_request.labels.*.name, 'dev-build') &&
       github.event.pull_request.head.repo.full_name == github.repository
-    uses: st0o0/github-workflows/.github/workflows/docker-dev.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/docker-dev.yml@v1.0.1
     with:
       image-name: ghcr.io/st0o0/bifrost
       image-description: Dev build of bifrost
@@ -246,9 +246,9 @@ concurrency:
   cancel-in-progress: true
 jobs:
   python:
-    uses: st0o0/github-workflows/.github/workflows/python-ci.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/python-ci.yml@v1.0.1
   commitlint:
-    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/commitlint.yml@v1.0.1
 ```
 
 Projects that aren't published as a package (apps, HA custom components) set
@@ -271,7 +271,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   scan:
-    uses: st0o0/github-workflows/.github/workflows/security.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/security.yml@v1.0.1
     with:
       docker-image-name: bifrost
     permissions:
@@ -291,7 +291,7 @@ on:
     types: [opened, synchronize]
 jobs:
   label:
-    uses: st0o0/github-workflows/.github/workflows/labeler.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/labeler.yml@v1.0.1
     permissions:
       contents: read
       pull-requests: write
@@ -307,7 +307,7 @@ on:
   workflow_dispatch:
 jobs:
   sync:
-    uses: st0o0/github-workflows/.github/workflows/labels.yml@v1.0.0
+    uses: st0o0/github-workflows/.github/workflows/labels.yml@v1.0.1
     permissions:
       contents: read
       issues: write
